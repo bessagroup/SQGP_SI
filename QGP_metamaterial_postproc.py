@@ -30,7 +30,7 @@ from scipy import stats
 
 # Preprocessing data:
 from sklearn.preprocessing import StandardScaler
-import gpflow 
+#import gpflow 
 import logging
 logging.basicConfig(format='%(asctime)s %(message)s')
 
@@ -49,7 +49,6 @@ import pprint
 from matplotlib.ticker import FuncFormatter
 
 # To save the model:
-from sklearn.externals import joblib
 import os
 import errno
 import scipy.io as sio
@@ -91,7 +90,6 @@ def interpolate_grid(data_dict, xvar, yvar, zvar, xbounds=None, ybounds= None, t
         points = np.array([x, y]).T
         grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
         
-        #plt.figure(figsize = (8,8 ))
         ax = plt.gca()
         ax.scatter(x, y, marker = '+', c= 100-z, s = 50, cmap='gray')
         if title is not None:
@@ -107,7 +105,6 @@ def interpolate_grid(data_dict, xvar, yvar, zvar, xbounds=None, ybounds= None, t
         
         plt.tight_layout()
         
-        #plt.show()
 def plot_GP_2d(X, Xnew, m, x, y,  idx_class=None , xlab = 'x1', ylab = 'x2', savepath = None, 
               suptitle = None, split_plots = False):
     
@@ -122,15 +119,14 @@ def plot_GP_2d(X, Xnew, m, x, y,  idx_class=None , xlab = 'x1', ylab = 'x2', sav
     if split_plots:
         f = plt.figure(figsize=(6, 6))
         plt.contourf(x, y,mean_mat  , cmap = 'inferno', label = "Mean")
-        plt.plot(X[:,0],X[:,1],'.', markersize = 8, label = 'training points'), #plt.axis("square")
+        plt.plot(X[:,0],X[:,1],'.', markersize = 8, label = 'training points')
         # Annotate plot
-        #plt.xlabel("$x_1$"), plt.ylabel("$x_2$")
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.ylabel(ylab, size = 18)
         plt.xlabel(xlab, size =18)
         plt.legend(prop={'size': 14})
         plt.title("Mean " + suptitle, size = 20)
-        plt.colorbar()#label = 'Mean: ' + title)
+        plt.colorbar()
         plt.tight_layout()
         
         if savepath is not None:
@@ -139,23 +135,21 @@ def plot_GP_2d(X, Xnew, m, x, y,  idx_class=None , xlab = 'x1', ylab = 'x2', sav
             
         f2 = plt.figure(figsize=(6, 6))  
         cov_mat  =Cov.reshape(x.shape)
-        cov_mat[idx_class] = np.nan
-        #cov_mat[]
-        #plt.subplot(1,2,2)    
+        cov_mat[idx_class] = np.nan 
+
         # Plot variance surface
-        #plt.pcolor(x, y, cov_mat**0.5,  rasterized = True)
         plt.contourf(x, y, cov_mat**0.5,  rasterized = True)
-        #plt.contourf(x, y, cov_mat**0.5, norm = LogNorm())
+
         # Show sample locations
         plt.plot(X[:,0],X[:,1],'.',  markersize = 8, label = 'training points'), #plt.axis("square")
+        
         # Annotate plot
-        #plt.xlabel("$x_1$"), plt.ylabel("$x_2$")
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.ylabel(ylab, size = 20)
         plt.xlabel(xlab, size = 20)
         plt.legend(prop={'size': 14})
         plt.title("Uncertainty ($\sigma$) " + suptitle, size = 20)
-        plt.colorbar()#label = 'STD: ' +title)
+        plt.colorbar()
 
         plt.tight_layout()
         if savepath is not None:
@@ -168,31 +162,28 @@ def plot_GP_2d(X, Xnew, m, x, y,  idx_class=None , xlab = 'x1', ylab = 'x2', sav
 
     # Left plot shows mean of GP fit
         plt.subplot(1,2,1)
-        plt.contourf(x, y,mean_mat  , cmap = 'inferno', label = "Mean")
-        plt.plot(X[:,0],X[:,1],'.', markersize = 8, label = 'training points'), #plt.axis("square")
+        plt.contourf(x, y,mean_mat  , cmap = 'inferno')
+        plt.plot(X[:,0],X[:,1],'.', markersize = 8, label = 'training points')
+
         # Annotate plot
-        #plt.xlabel("$x_1$"), plt.ylabel("$x_2$")
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.ylabel(ylab, size = 18)
         plt.xlabel(xlab, size =18)
         plt.legend(prop={'size': 14})
         plt.title("Mean", size = 20)
-        plt.colorbar()#label = 'Mean: ' + title)
+        plt.colorbar()
 
         # Right plot shows the variance of the GP
-
         cov_mat  =Cov.reshape(x.shape)
         cov_mat[idx_class] = np.nan
-        #cov_mat[]
         plt.subplot(1,2,2)    
         # Plot variance surface
-        #plt.pcolor(x, y, cov_mat**0.5,  rasterized = True)
-        plt.contourf(x, y, cov_mat**0.5,  rasterized = True)
-        #plt.contourf(x, y, cov_mat**0.5, norm = LogNorm())
+        plt.contourf(x, y, cov_mat**0.5)
+
         # Show sample locations
         plt.plot(X[:,0],X[:,1],'.',  markersize = 8, label = 'training points'), #plt.axis("square")
+        
         # Annotate plot
-        #plt.xlabel("$x_1$"), plt.ylabel("$x_2$")
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.ylabel(ylab, size = 20)
         plt.xlabel(xlab, size = 20)
@@ -222,15 +213,15 @@ def plot_GP_classification_2d(X, Xnew, m, x, y, xlab = 'x1', ylab = 'x2', savepa
     mean, Cov = m.predict(Xnew, full_cov=False)
     binary_class =  np.round(mean.reshape(x.shape))
     print('GP prediction with noise')
+    
     # Left plot shows mean of GP fit
     plt.subplot(111)
     img = plt.contourf(x, y, binary_class, cmap = 'inferno', levels = [-0.1,0.5, 1.1])
 
     cbar = plt.colorbar(img, ticks = [0.25, 0.75])
     cbar.ax.set_yticklabels(['non- \ncoilable',  'coilable'])
-    plt.plot(X[:,0],X[:,1],'.', label = 'training points'), #plt.axis("square")
+    plt.plot(X[:,0],X[:,1],'.', label = 'training points')
     # Annotate plot
-    #plt.xlabel("$x_1$"), plt.ylabel("$x_2$")
     if title is not None:
         plt.title(title, size = 22), #plt.colorbar()
     plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
@@ -242,14 +233,13 @@ def plot_GP_classification_2d(X, Xnew, m, x, y, xlab = 'x1', ylab = 'x2', savepa
     
     if savepath is not None:
         print('Saving figure!')
-        f.savefig(savepath, inches = 'tight')        
+        f.savefig(savepath, bbox_inches = 'tight')        
 
     return idx_not_classified, idx_classified
 
 class Unit_cell():
     
     def __init__(self, data, Length, D1):
-        #data = STRUCTURES_data['Input'+str(iInput+1)]['Imperfection'+str(kImperf+1)]['DoE'+str(jDoE+1)]
         self._coilable = None
         self._maxStrain = None
         
@@ -367,12 +357,12 @@ class Analyze():
         
         #other parameters: x indices from original 7 dim notation:
         
-        A_D1 = 1.e-3 #X[0]
-        G_E = 3.6e-1 #X[1]
-        #I_x = running variable
+        A_D1 = 1.e-3    #X[0]
+        G_E = 3.6e-1    #X[1]
+        #I_x =          #running variable
         Iy = 7.5e-7
         J_D1 = 1.e-6 
-        P_D = 0.66  #X[5]
+        P_D = 0.66      #X[5]
         ConeSlope  = 0. #X[6]
         Length = P_D*D1
 
@@ -441,7 +431,8 @@ class Analyze():
         data_dict['P_crit'] = np.array(self._buckling_load[iInput-1][iImperfection-1])
         return data_dict
     
-def combined_qgp_plot(qgp_mean, points_mean, qgp_std, points_std, title = '$P_{crit}$',
+def combined_qgp_plot(qgp_mean, points_mean, qgp_std, points_std, X1, X2, 
+                        idx_not_classified, title = '$P_{crit}$',
                       savepath = None, Xtr = None, split_plots = False):
     
     xbounds = [0, max(X1), min(X2), max(X2)]
@@ -455,7 +446,6 @@ def combined_qgp_plot(qgp_mean, points_mean, qgp_std, points_std, title = '$P_{c
     
     if split_plots:
         fig = plt.figure(figsize = (6, 6))
-        #plt.subplot(1, 2, 1)
         img = plt.contourf(xd, yd, grid_z, cmap = 'inferno')
         plt.colorbar(img)
         plt.ticklabel_format(style='sci', axis='x', scilimits=(-1,0))
@@ -472,7 +462,6 @@ def combined_qgp_plot(qgp_mean, points_mean, qgp_std, points_std, title = '$P_{c
             fig.savefig(savepath + '1.png', dpi = 400)
             fig.savefig(savepath + '1.svg')
             
-        #plt.subplot(1, 2, 2)
         grid_z_std = griddata(points_std ,qgp_std , (xd, yd) , method='linear')
         grid_z_std[idx_not_classified[1],idx_not_classified[0]] = np.nan
 
@@ -494,13 +483,7 @@ def combined_qgp_plot(qgp_mean, points_mean, qgp_std, points_std, title = '$P_{c
         
         if savepath is not None:
             fig2.savefig(savepath + '2.png', dpi = 400)
-            fig2.savefig(savepath + '2.svg')
-        #plt.subplots_adjust(top=0.85)     # Add space at top
-        #plt.suptitle('QGP model: '+title,  size = 22, y = 0.98)
-
-        #if savepath is not None:
-        #    print('Saving figure!')
-        #    fig.savefig(savepath)        
+            fig2.savefig(savepath + '2.svg')     
     
     else:
         fig = plt.figure(figsize = (12, 6))
@@ -555,11 +538,11 @@ class postproc_QGP_2d():
         self._classical_res = []
         
         if var_data:
-            res_path = os.path.expanduser("~/qgpr/serial_experiment_2d/" +experiment_name + "/results-var/")
+            res_path = os.getcwd() + "/serial_experiment_2d/" +experiment_name + "/results-var/"
         else:
-            res_path = os.path.expanduser("~/qgpr/serial_experiment_2d/" +experiment_name + "/results/")
+            res_path = os.getcwd() + "/serial_experiment_2d/" +experiment_name + "/results/"
        
-        print(res_path)
+        #print(res_path)
         
 
         for file in listdir(res_path):
@@ -568,9 +551,8 @@ class postproc_QGP_2d():
             self._Res_dicts.append(pickle.load(f))
             f.close()
 
-            
 
-        classical_res = []
+        #classical_res = []
         
         #VARIANCE 
         if var_data:
@@ -587,7 +569,7 @@ class postproc_QGP_2d():
                 if var - self._Res_dicts[i]['qgp_result_stv']<0:
                     flag = True
             if flag:
-                print('NEGATIVE VARIANCE ENOUNTERED!!, value nulled')
+                print('NEGATIVE VARIANCE ENOUNTERED, replaced with 0')
         #MEAN
         else:
             for i in range(len(self._Res_dicts)):
@@ -595,8 +577,6 @@ class postproc_QGP_2d():
                 self._QGP_error.append(self._Res_dicts[i]['error%_stv'])
                 self._xqgp.append(Xnew_test[self._idx_list[i]])
                 self._classical_res.append(self._Res_dicts[i]['classical_result'])
-                #print(Xnew_test[idx_list[i]])
-                #print(i, idx_list[i])
 
         self._xqgp = np.array(self._xqgp)
         self._QGP_predict = np.array(self._QGP_predict).flatten()
@@ -609,8 +589,6 @@ class postproc_QGP_2d():
                       vmin = 5, vmax = 50, idx_class = None, 
                      savepath = None, plot_query_points = False, levels = None):
 
-        #grid_x, grid_y = np.mgrid[min(self._xqgp[:, 0]):max(self._xqgp[:, 0]):100j,
-        #                          min(self._xqgp[:, 1]):max(self._xqgp[:, 1]):100j]
         grid_x, grid_y = np.mgrid[xbounds[0]:xbounds[1]:100j,
                                   xbounds[2]:xbounds[3]:100j]
       
@@ -618,28 +596,21 @@ class postproc_QGP_2d():
         z = self._QGP_predict
         
         grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
-        #grid_z = np.nan_to_num(grid_z, 0)
     
         grid_z[idx_class] = np.nan
-        grid_mean = copy.copy(grid_z)
+        #grid_mean = copy.copy(grid_z)
         
         fig = plt.figure(figsize = (12,6 ))
         plt.subplot(1, 2, 1)
         plt.ticklabel_format(style='sci', axis='x', scilimits=(-1,0))
         plt.xlabel(xlabel, size = 18)
-        plt.ylabel(ylabel, size = 18)
-        #a = (max(xqgp[:, 0])-min(xqgp[:, 0]))/(max(xqgp[:, 1])-min(xqgp[:, 1]))   
-        
+        plt.ylabel(ylabel, size = 18)        
         img0 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, 
                                                  extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
                                                     min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
                                                      vmin = vmin, vmax = vmax,
-                                                    origin='lower' , levels = levels)#, levels = np.linspce(vmin, vmax, 10))
-
-        
-        #divider = make_axes_locatable(ax)
-        #cax = divider.append_axes("right", size="5%", pad=0.1)
-        cbar = plt.colorbar(img0, ticks = levels)#, label= zlabel)
+                                                    origin='lower' , levels = levels)
+        cbar = plt.colorbar(img0, ticks = levels)
         if zlabel is not None:
             cbar.set_label(zlabel,size=18)
         plt.tight_layout()
@@ -660,13 +631,11 @@ class postproc_QGP_2d():
         plt.ticklabel_format(style='sci', axis='x', scilimits=(0,0))
         plt.xlabel(xlabel, size = 18)
         plt.ylabel(ylabel, size = 18)
-        #a = (max(xqgp[:, 0])-min(xqgp[:, 0]))/(max(xqgp[:, 1])-min(xqgp[:, 1]))       
         img = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
                                                            min(self._xqgp[:, 1]), max(self._xqgp[:, 1])),
                                                    vmin = vmin, vmax = vmax,
                                                     origin='lower', levels = levels)
-        #divider = make_axes_locatable()
-        #cax = divider.append_axes("right", size="5%", pad=0.1)
+
         cbar2 = plt.colorbar(img, ticks = levels)#, label= zlabel)
         if zlabel is not None:
             cbar2.set_label(zlabel,size=18)
@@ -679,7 +648,7 @@ class postproc_QGP_2d():
 
         plt.title('Classical results', size = 20)
         plt.tight_layout()
-        plt.subplots_adjust(left = 0.02, right = 0.98, top=0.85)     # Add space at top
+        plt.subplots_adjust(left = 0.02, right = 0.98, top=0.85)     
         fig.suptitle(suptitle, size = 22, y= 0.98)
 
         if savepath is not None:
@@ -698,8 +667,7 @@ class postproc_QGP_2d():
                             vmin = 5, vmax = 50, idx_class = None, 
                             savepath = None, levels = None, plot_query_points = False, variance_case = False):
 
-        #grid_x, grid_y = np.mgrid[min(self._xqgp[:, 0]):max(self._xqgp[:, 0]):100j,
-        #                          min(self._xqgp[:, 1]):max(self._xqgp[:, 1]):100j]
+
         grid_x, grid_y = np.mgrid[xbounds[0]:xbounds[1]:100j,
                                   xbounds[2]:xbounds[3]:100j]
       
@@ -707,12 +675,11 @@ class postproc_QGP_2d():
         
         if not variance_case:
             z = copy.copy(self._QGP_error)
-            #z[np.where(self._QGP_error>100)] = 100
         else:
             z = np.abs((self._QGP_predict-self._classical_res) /self._classical_res)*100. #for uncertainty
         z[np.where(z>100)] = 100
-        print(z)
-        print('error capped to 100%')
+        #print(z)
+        #print('error capped to 100%')
         
         grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
         
@@ -724,16 +691,6 @@ class postproc_QGP_2d():
         plt.ticklabel_format(style='sci', axis='x', scilimits=(-1,0))
         plt.xlabel(xlabel, size = 18)
         plt.ylabel(ylabel, size = 18)
-        #a = (max(xqgp[:, 0])-min(xqgp[:, 0]))/(max(xqgp[:, 1])-min(xqgp[:, 1]))   
-
-        #img0 = plt.pcolor(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm())#, 
-                                                 #extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
-                                                 #   min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
-                                                     #vmin = vmin, vmax = vmax,
-                                                    #origin='lower')
-
-        #lvls = np.logspace(np.round(np.log10(np.min(z)))-1, np.round(np.log10(np.max(z))), 7)
-        
         if levels is None:
             lvls = np.logspace(-1, 2, 13)
         else:
@@ -743,16 +700,8 @@ class postproc_QGP_2d():
         grid_z[np.where(grid_z>100.)] = 99.99999
         grid_z[np.where(grid_z<np.min(lvls))] = np.min(lvls)
         
-        img0 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm(), levels = lvls)#, 
-                                         #extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
-                                            #min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
-                                             #vmin = vmin, vmax = vmax,
-                                            #origin='lower')
-
-        
-        #divider = make_axes_locatable(ax)
-        #cax = divider.append_axes("right", size="5%", pad=0.1)
-        cbar = plt.colorbar(img0, format='%.1f%%')#, label= zlabel)
+        img0 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm(), levels = lvls)
+        cbar = plt.colorbar(img0, format='%.1f%%')
         cbar.set_label(zlabel,size=18)
         plt.tight_layout()
         
@@ -775,18 +724,8 @@ class postproc_QGP_2d():
         plt.ticklabel_format(style='sci', axis='x', scilimits=(-1,0))
         plt.xlabel(xlabel, size = 18)
         plt.ylabel(ylabel, size = 18)
-        #a = (max(xqgp[:, 0])-min(xqgp[:, 0]))/(max(xqgp[:, 1])-min(xqgp[:, 1]))   
-
-        img1 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, rasterized = True)#, 
-                                                 #extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
-                                                 #   min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
-                                                     #vmin = vmin, vmax = vmax,
-                                                    #origin='lower')
-
-        
-        #divider = make_axes_locatable(ax)
-        #cax = divider.append_axes("right", size="5%", pad=0.1)
-        cbar = plt.colorbar(img1)#, label= zlabel)
+        img1 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP)
+        cbar = plt.colorbar(img1)
     
 
         cbar.set_label(zlabel2,size=18, labelpad= 10)
@@ -798,7 +737,7 @@ class postproc_QGP_2d():
         plt.title('Absolute error', size = 20)
         
         plt.tight_layout()        
-        plt.subplots_adjust(top=0.85)     # Add space at top
+        plt.subplots_adjust(top=0.85)    
 
         fig.suptitle(suptitle, size = 22, y= 0.98)
 
@@ -822,7 +761,6 @@ class postproc_QGP_2d():
                                   xbounds[2]:xbounds[3]:100j]
         points = self._xqgp 
         z = copy.copy(self._QGP_error)
-        #z = self._QGP_error
         z[np.where(self._QGP_error>100)] = 100
         #print(z)
         #print('error capped to 100% for readibility')
@@ -833,8 +771,8 @@ class postproc_QGP_2d():
         
         if idx_class is not None:
             grid_z[idx_class] = np.nan
-        #FIRST PLOT: EXPERIMENTAL QGP ERROR
         
+        #FIRST PLOT: EXPERIMENTAL QGP ERROR
         
         fig1 = plt.figure(figsize = (12,6 ))
         plt.subplot(1, 2, 1)
@@ -843,7 +781,6 @@ class postproc_QGP_2d():
         plt.ylabel(ylabel, size = 18)
         
 
-        #img0 = plt.pcolor(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm())
         img0 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, levels = lvls, norm = LogNorm(),
                                          extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
                                             min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
@@ -869,7 +806,6 @@ class postproc_QGP_2d():
         eig, mu = np.linalg.eig(mat)
         threshold = np.max(eig)/(2**input_dictionary['k']-1)
 
-        #mat_pca = mu @ np.diag(eig) @ mu.T
         eig_inv = 1./eig
         eig_inv[np.where(eig<threshold)] = 0
         mat_pca_inv = mu @ np.diag(eig_inv) @ mu.T
@@ -884,21 +820,14 @@ class postproc_QGP_2d():
             exact = np.dot(U.T, (np.linalg.solve(mat, V)))
             error_pca.append(approximation - exact)
             error_pca_rel.append(np.abs((exact-approximation)*100./exact))
-            #print( np.array([approximation, exact, self._classical_res[i], error_pca_rel[i], 
-            #self._Res_dicts[i]['error%_stv']]))
-            #check.append(exact - test_8x8_2._classical_res[i])
 
         #PLOT2:PCA errors
-        
         
         grid_x, grid_y = np.mgrid[xbounds[0]:xbounds[1]:100j,
                                   xbounds[2]:xbounds[3]:100j]
         points = self._xqgp 
-        z = np.abs(np.array(error_pca_rel)) #np.abs(self._QGP_predict-self._classical_res) 
-        
+        z = np.abs(np.array(error_pca_rel)) 
         z[np.where(z>100)] = 100
-        #print(z)
-        #print('error capped to 100% for readibility')
         
         grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
         grid_z = np.nan_to_num(grid_z)
@@ -911,17 +840,12 @@ class postproc_QGP_2d():
         plt.ticklabel_format(style='sci', axis='x', scilimits=(-1,0))
         plt.xlabel(xlabel, size = 18)
         plt.ylabel(ylabel, size = 18)
-        #a = (max(xqgp[:, 0])-min(xqgp[:, 0]))/(max(xqgp[:, 1])-min(xqgp[:, 1]))   
-
         img1 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, levels = lvls, norm = LogNorm(),
                                          extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
                                             min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
                                             origin='lower')
 
-        
-        #divider = make_axes_locatable(ax)
-        #cax = divider.append_axes("right", size="5%", pad=0.1)
-        #cbar = plt.colorbar(img1)#, label= zlabel)
+
         zlabel = '$Error [\%]$'
         cbar = plt.colorbar(img1, ticks = lvls, format=bar_format)#, label= zlabel)
         cbar.set_label(zlabel,size=18)
@@ -947,18 +871,10 @@ class postproc_QGP_2d():
         plt.xlabel(xlabel, size = 18)
         plt.ylabel(ylabel, size = 18)
         z = np.abs(self._QGP_error - np.abs(np.array(error_pca_rel)))
-        #print(self._QGP_error)
-        #print(np.abs(np.array(error_pca_rel)))
-        #print(z)
         grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
+
         
-        #img2 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm(),
-        #                    levels = np.logspace(-1, 2, 18), 
-        #                         extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
-        #                            min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
-        #                            origin='lower')
-        
-        img2 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm(), rasterized = True)
+        img2 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, norm = LogNorm())
         
         
         zlabel = 'Error $[\%]$'
@@ -967,37 +883,11 @@ class postproc_QGP_2d():
 
         plt.scatter(self._xqgp[:, 0], self._xqgp[:, 1], marker = '+', c= 100-z, s = 50, cmap='gray')
         plt.title('$\epsilon_{QGP}[\%] - \epsilon_{PCA}[\%]$', size = 20)
-        #plt.tight_layout()
         
-        
-        '''
-        plt.subplot(1, 2, 2)
-        plt.ticklabel_format(style='sci', axis='x', scilimits=(-1,0))
-        plt.xlabel(xlabel, size = 18)
-        plt.ylabel(ylabel, size = 18)
-        z = np.abs(self._QGP_error/np.abs(np.array(error_pca_rel)))
-        print(self._QGP_error)
-        print(np.abs(np.array(error_pca_rel)))
-        print(z)
-        grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
-        
-        img3 = plt.contourf(grid_x, grid_y, grid_z, cmap = CMAP, 
-                                 extent=(min(self._xqgp[:, 0]), max(self._xqgp[:, 0]),
-                                    min(self._xqgp[:, 1]), max(self._xqgp[:, 1])), 
-                                    origin='lower')
-        
-        zlabel = 'Error $[\%]$'
-        cbar = plt.colorbar(img3, format='%.1f%%')#, label= zlabel)
-        cbar.set_label(zlabel,size=18)
 
-        plt.scatter(self._xqgp[:, 0], self._xqgp[:, 1], marker = '+', c= 100-z, s = 50, cmap='gray')
-        plt.title('$\epsilon_{QGP}[\%] - \epsilon_{PCA}[\%]$', size = 20)
-        plt.tight_layout()
-        plt.show()
-        '''
         if savepath1 is not None:
             print('Saving figure!')
-            fig1.savefig(savepath1, inches = 'tight')
+            fig1.savefig(savepath1, bbox_inches = 'tight')
             
         if savepath2 is not None:
             print('Saving figure!')
@@ -1025,8 +915,8 @@ def dict_validation_plot(input_dictionary, xbounds,m,X, Xnew, x_full, y_full, id
     
     points =  input_dictionary['Xnew']
     z =  validation_mean
-    print(z)
-    print('error capped to 100%')
+    #print(z)
+    #print('error capped to 100%')
 
     grid_z = griddata(points, z, (grid_x, grid_y), method='linear')
     grid_z[idx_class] = np.nan
@@ -1048,7 +938,6 @@ def dict_validation_plot(input_dictionary, xbounds,m,X, Xnew, x_full, y_full, id
     plt.scatter(input_dictionary['Xnew'][:, 0], input_dictionary['Xnew'][:, 1], 
                 marker = '+', c= 100-z, s = 50, cmap='gray')
     
-    #plt.scatter(Xnew_test_additional[:, 0], Xnew_test_additional[:, 1])
     plt.title('Mean', size = 20)
 
 
@@ -1066,7 +955,7 @@ def dict_validation_plot(input_dictionary, xbounds,m,X, Xnew, x_full, y_full, id
     plt.xlabel(xlabel, size = 18)
     plt.ylabel(ylabel, size = 18)
     
-    img1 = plt.pcolor(grid_x, grid_y, grid_z, cmap = 'viridis', rasterized = True)
+    img1 = plt.pcolor(grid_x, grid_y, grid_z, cmap = 'viridis')
     cbar = plt.colorbar(img1)
     zlabel = 'STD'
     cbar.set_label(zlabel,size=18)
